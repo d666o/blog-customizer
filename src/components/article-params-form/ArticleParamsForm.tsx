@@ -2,7 +2,7 @@ import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
 
 import styles from './ArticleParamsForm.module.scss';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import clsx from 'clsx';
 import { Select } from 'src/ui/select';
 import {
@@ -17,6 +17,8 @@ import {
 } from 'src/constants/articleProps';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
+import { Text } from 'src/ui/text';
+import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
 
 type ArticleParamsFormProps = {
 	style: ArticleStateType;
@@ -24,14 +26,15 @@ type ArticleParamsFormProps = {
 };
 
 export const ArticleParamsForm = (props: ArticleParamsFormProps) => {
-	const { style, styleHandler } = props;
+	const { styleHandler } = props;
 	const [isOpen, setIsOpen] = useState(false);
-	const [selectedStyles, setSelectedStyles] = useState({
-		fontFamilyOption: style.fontFamilyOption,
-		fontColor: style.fontColor,
-		backgroundColor: style.backgroundColor,
-		contentWidth: style.contentWidth,
-		fontSizeOption: style.fontSizeOption,
+	const rootRef = useRef<HTMLDivElement>(null);
+	const [selectedStyles, setSelectedStyles] =
+		useState<ArticleStateType>(defaultArticleState);
+	useOutsideClickClose({
+		isOpen,
+		rootRef,
+		onChange: setIsOpen,
 	});
 	const setSelectedStylesHandler = (selected: OptionType, type: string) => {
 		setSelectedStyles({ ...selectedStyles, [type]: selected });
@@ -57,8 +60,12 @@ export const ArticleParamsForm = (props: ArticleParamsFormProps) => {
 				}}
 			/>
 			<aside
-				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
+				className={clsx(styles.container, { [styles.container_open]: isOpen })}
+				ref={rootRef}>
 				<form className={styles.form} onSubmit={submitHandler}>
+					<Text as='h2' size={31} weight={800} uppercase dynamicLite>
+						Задайте параметры
+					</Text>
 					<Select
 						selected={selectedStyles.fontFamilyOption}
 						options={fontFamilyOptions}
